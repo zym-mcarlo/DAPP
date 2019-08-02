@@ -1,7 +1,11 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const webpack = require('webpack')
 const VuePlugin = require('vue-loader/lib/plugin')
+const CopyPlugin = require('copy-webpack-plugin')
 const { resolve } = require('./util')
+const config = require('./config')
+
+process.env.NODE_ENV = 'development'
 
 module.exports = {
   entry: {
@@ -10,7 +14,7 @@ module.exports = {
   output: {
     filename: '[name]_[hash:6].js',
     path: resolve('dist'),
-    publicPath: '/'
+    publicPath: config.publicPath
   },
   resolve: {
     alias: {
@@ -46,7 +50,7 @@ module.exports = {
         ]
       },
       {
-        test: /\.(jpg(e)?|png|gif|svg)$/,
+        test: /\.(jpg(e)?|png|gif|svg|woff|ttf)$/,
         loader: 'url-loader',
         options: {
           limit: 10240
@@ -56,10 +60,22 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: resolve('index.html')
+      template: resolve('index.html'),
+      favicon: resolve('src/favicon.ico')
     }),
     new webpack.HotModuleReplacementPlugin(),
-    new VuePlugin()
+    new VuePlugin(),
+    new CopyPlugin([
+      {
+        from: resolve('static'),
+        to: resolve('dist/static')
+      }
+    ]),
+    new webpack.DefinePlugin({
+      'process.env': {
+        NODE_ENV: JSON.stringify(process.env.NODE_ENV)
+      }
+    })
   ],
   devServer: {
     host: '0.0.0.0',
@@ -74,5 +90,6 @@ module.exports = {
     hot: true,
     // quiet: true
   },
-  stats: 'errors-warnings'
+  stats: 'errors-warnings',
+  devtool: config.tool
 }

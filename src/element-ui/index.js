@@ -14,7 +14,8 @@ import {
   Table,
   TableColumn,
   Header,
-  Input
+  Input,
+  Tooltip
 } from 'element-ui'
 
 Vue.use(Button)
@@ -28,6 +29,7 @@ Vue.use(Table)
 Vue.use(TableColumn)
 Vue.use(Header)
 Vue.use(Input)
+Vue.use(Tooltip)
 
 Vue.use(Loading.directive)
 
