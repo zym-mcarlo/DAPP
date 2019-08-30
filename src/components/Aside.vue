@@ -5,7 +5,7 @@
         <img src="@/assets/image/logo.png" alt="" width="36">
         <span>P106-1</span>
       </p>
-      <p class="hint">价值流转，矿机永存</p>
+      <!-- <p class="hint">价值流转，矿机永存</p> -->
     </div>
 
     <div class="account">
@@ -16,7 +16,6 @@
       </el-tooltip>
       <div v-if="isAuthentication" class="content">
         <div class="balance">
-          <label for="">持有：</label>
           <span>{{balance | format}} P106-1</span>
         </div>
         <p class="hint">DAI 余额： {{daiBalance | format}}</p>
@@ -69,7 +68,7 @@ export default {
     },
     formatEllipsis (val) {
       if (val.length < 20) return val
-      return val.slice(0, 10) + '...' + val.slice(-10, -1)
+      return val.slice(0, 10) + '...' + val.slice(-10)
     }
   },
   computed: {
@@ -98,6 +97,7 @@ export default {
         this.balance = res
       }).catch(err => {
         this.$message({ message: err.message, type: 'error' })
+        console.log(err)
       })
     },
     getDaiBalance_ () {
@@ -128,7 +128,8 @@ export default {
     withdraw_ () { // 领取收益
       this.withdrawState = true
       this.contractMbf.methods.withdraw().send({
-        from: this.wallet
+        from: this.wallet,
+        gasPrice: this.gasPrice
       }).then(res => {
         this.withdrawState = false
         this.getDaiCanReceive_()
@@ -171,6 +172,7 @@ export default {
         text-align center
         opacity 0.7
     .account
+      padding-bottom 30px
       p.title
         font-size plainTitleSize
         text-align center

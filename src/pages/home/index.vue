@@ -5,8 +5,8 @@
       <section class="content">
         <div class="table">
           <el-row :gutter="20" style="margin-bottom: 10px;">
-            <el-col :span="6" :xs="12" :sm="10" :md="8" :xl="6">剩余</el-col>
-            <el-col :span="6" :xs="12" :sm="10" :md="8" :xl="6">单价</el-col>
+            <el-col :span="6" :xs="12" :sm="10" :md="8" :xl="6">剩余可认购</el-col>
+            <el-col :span="6" :xs="12" :sm="10" :md="8" :xl="6">认购单价</el-col>
           </el-row>
           <el-row :gutter="20">
             <el-col :span="6" :xs="12" :sm="10" :md="8" :xl="6">{{residueP106 | format}} P106-1</el-col>
@@ -26,11 +26,15 @@
           </div>
           <div class="group">
             <label for="">DAI 授权：</label>
-            <el-button v-if="!isAuthorization" type="primary" @click="authorization_()" :icon="authorizationState ? 'el-icon-loading' : ''">授权</el-button>
+            <el-button v-if="!isAuthorization" type="primary" @click="authorization_()" :icon="authorizationState ? 'el-icon-loading' : ''" :disabled="!wallet">
+              <span v-if="authorizationState">正在</span>授权
+            </el-button>
             <el-button v-else type="info" disabled>已授权</el-button>
           </div>
           <div class="btn">
-            <el-button type="primary" @click="buy_()" :icon="buyState ? 'el-icon-loading' : ''">购买</el-button>
+            <el-button type="primary" @click="buy_()" :icon="buyState ? 'el-icon-loading' : ''" :disabled="!wallet || !buyNum || !Number(buyNum)">
+              <span v-if="buyState">正在</span>购买
+            </el-button>
           </div>
         </div>
       </section>
@@ -48,7 +52,7 @@
           <el-row :gutter="20">
             <el-col :span="6">P106-1</el-col>
             <el-col :span="6">{{maxSupply | format}}</el-col>
-            <el-col :span="12">1 P106-1=1台 P106-100 显卡矿机</el-col>
+            <el-col :span="12">1 P106-1=2台 P106-100 显卡矿机</el-col>
           </el-row>
         </div>
       </section>
@@ -134,7 +138,8 @@ export default {
     authorization_ () { // 授权
       this.authorizationState = true
       this.contractMbt.methods.approve(this.mbf, this.canUse).send({
-        from: this.wallet
+        from: this.wallet,
+        gasPrice: this.gasPrice
       }).then(res => {
         this.authorizationState = false
         this.getAuthorizationState_()
@@ -161,14 +166,11 @@ export default {
       })
     },
     buy_ () { // 购买 p106
-      if (!this.buyNum || !Number(this.buyNum)) {
-        this.$message({ message: '输入的数量有误', type: 'warning' })
-        return
-      }
       this.buyState = true
       let ctkRequired = BigNumber(this.buyNum).times(this.e18).toFixed()
       this.contractMbf.methods.join(ctkRequired).send({
-        from: this.wallet
+        from: this.wallet,
+        gasPrice: this.gasPrice
       }).then(res => {
         this.buyState = false
         this.$message({ message: '貌似购买成功了', type: 'success' })
